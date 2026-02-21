@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { detectPlatform } from "@/lib/platform";
+import { extractContent } from "@/lib/extractors";
+import type { Platform } from "@/types/bookmark";
 
 // GET /api/bookmarks - List bookmarks with filters
 export async function GET(request: NextRequest) {
@@ -76,13 +78,32 @@ export async function POST(request: NextRequest) {
 
   const platform = detectPlatform(url);
 
-  const bookmark = await prisma.bookmark.create({
+  // Create bookmark immediately
+  let bookmark = await prisma.bookmark.create({
     data: {
       originalUrl: url,
       platform,
-      title: url, // Placeholder until extraction
+      title: url,
     },
   });
+
+  // Extract content in the background (non-blocking for the response)
+  try {
+    const extracted = await extractContent(url, platform as Platform);
+    bookmark = await prisma.bookmark.update({
+      where: { id: bookmark.id },
+      data: {
+        title: extracted.title || url,
+        description: extracted.description,
+        content: extracted.content,
+        thumbnailUrl: extracted.thumbnailUrl,
+        authorName: extracted.authorName,
+        publishedAt: extracted.publishedAt,
+      },
+    });
+  } catch (err) {
+    console.error(`Content extraction failed for ${url}:`, err);
+  }
 
   return NextResponse.json({ bookmark }, { status: 201 });
 }
