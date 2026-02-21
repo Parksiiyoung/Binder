@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
   const platform = searchParams.get("platform");
+  const category = searchParams.get("category");
   const isFavorite = searchParams.get("isFavorite");
   const search = searchParams.get("search");
 
@@ -18,6 +19,9 @@ export async function GET(request: NextRequest) {
 
   if (platform) {
     where.platform = platform;
+  }
+  if (category) {
+    where.aiCategory = category;
   }
   if (isFavorite === "true") {
     where.isFavorite = true;

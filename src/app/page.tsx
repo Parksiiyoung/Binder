@@ -28,6 +28,7 @@ export default function HomePage() {
 
   // Filters
   const [platform, setPlatform] = useState("");
+  const [category, setCategory] = useState("");
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
@@ -43,6 +44,7 @@ export default function HomePage() {
       setLoading(true);
       const params = new URLSearchParams({ page: String(page), limit: "20" });
       if (platform) params.set("platform", platform);
+      if (category) params.set("category", category);
       if (favoriteOnly) params.set("isFavorite", "true");
       if (searchDebounced) params.set("search", searchDebounced);
 
@@ -61,7 +63,7 @@ export default function HomePage() {
         setLoading(false);
       }
     },
-    [platform, favoriteOnly, searchDebounced]
+    [platform, category, favoriteOnly, searchDebounced]
   );
 
   useEffect(() => {
@@ -120,6 +122,8 @@ export default function HomePage() {
         <FilterBar
           platform={platform}
           onPlatformChange={setPlatform}
+          category={category}
+          onCategoryChange={setCategory}
           favoriteOnly={favoriteOnly}
           onFavoriteToggle={() => setFavoriteOnly(!favoriteOnly)}
           search={search}

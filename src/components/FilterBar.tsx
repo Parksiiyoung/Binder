@@ -8,9 +8,21 @@ const PLATFORMS = [
   { value: "WEB", label: "Web" },
 ];
 
+const CATEGORIES = [
+  "기술",
+  "디자인",
+  "비즈니스",
+  "자기계발",
+  "건강",
+  "엔터테인먼트",
+  "기타",
+];
+
 interface FilterBarProps {
   platform: string;
   onPlatformChange: (platform: string) => void;
+  category: string;
+  onCategoryChange: (category: string) => void;
   favoriteOnly: boolean;
   onFavoriteToggle: () => void;
   search: string;
@@ -20,50 +32,81 @@ interface FilterBarProps {
 export default function FilterBar({
   platform,
   onPlatformChange,
+  category,
+  onCategoryChange,
   favoriteOnly,
   onFavoriteToggle,
   search,
   onSearchChange,
 }: FilterBarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {/* Search */}
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="검색..."
-        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
-      />
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Search */}
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="검색..."
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
+        />
 
-      {/* Platform filter */}
-      <div className="flex gap-1">
-        {PLATFORMS.map((p) => (
+        {/* Platform filter */}
+        <div className="flex gap-1">
+          {PLATFORMS.map((p) => (
+            <button
+              key={p.value}
+              onClick={() => onPlatformChange(p.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                platform === p.value
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Favorite toggle */}
+        <button
+          onClick={onFavoriteToggle}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            favoriteOnly
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          {favoriteOnly ? "★ 즐겨찾기만" : "☆ 즐겨찾기"}
+        </button>
+      </div>
+
+      {/* Category filter */}
+      <div className="flex flex-wrap gap-1">
+        <button
+          onClick={() => onCategoryChange("")}
+          className={`px-2.5 py-1 rounded text-xs transition-colors ${
+            category === ""
+              ? "bg-purple-600 text-white"
+              : "bg-purple-50 text-purple-600 hover:bg-purple-100"
+          }`}
+        >
+          전체 카테고리
+        </button>
+        {CATEGORIES.map((c) => (
           <button
-            key={p.value}
-            onClick={() => onPlatformChange(p.value)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              platform === p.value
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            key={c}
+            onClick={() => onCategoryChange(c)}
+            className={`px-2.5 py-1 rounded text-xs transition-colors ${
+              category === c
+                ? "bg-purple-600 text-white"
+                : "bg-purple-50 text-purple-600 hover:bg-purple-100"
             }`}
           >
-            {p.label}
+            {c}
           </button>
         ))}
       </div>
-
-      {/* Favorite toggle */}
-      <button
-        onClick={onFavoriteToggle}
-        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-          favoriteOnly
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-        }`}
-      >
-        {favoriteOnly ? "★ 즐겨찾기만" : "☆ 즐겨찾기"}
-      </button>
     </div>
   );
 }

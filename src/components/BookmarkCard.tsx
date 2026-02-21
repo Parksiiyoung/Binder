@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Bookmark } from "@prisma/client";
 import PlatformBadge from "./PlatformIcon";
 
@@ -59,9 +60,11 @@ export default function BookmarkCard({
           </div>
 
           {/* Title */}
-          <h3 className="font-semibold text-gray-900 mb-1 truncate">
-            {displayTitle}
-          </h3>
+          <Link href={`/bookmarks/${bookmark.id}`}>
+            <h3 className="font-semibold text-gray-900 mb-1 truncate hover:text-blue-600 transition-colors">
+              {displayTitle}
+            </h3>
+          </Link>
 
           {/* Author */}
           {bookmark.authorName && (
