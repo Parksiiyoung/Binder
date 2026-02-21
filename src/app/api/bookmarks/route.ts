@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { detectPlatform } from "@/lib/platform";
 import { extractContent } from "@/lib/extractors";
+import { analyzeContent } from "@/lib/ai";
 import type { Platform } from "@/types/bookmark";
 
 // GET /api/bookmarks - List bookmarks with filters
@@ -103,6 +104,32 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error(`Content extraction failed for ${url}:`, err);
+  }
+
+  // AI analysis (best-effort, don't block response on failure)
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const aiResult = await analyzeContent({
+        url,
+        platform,
+        title: bookmark.title,
+        description: bookmark.description,
+        content: bookmark.content,
+        authorName: bookmark.authorName,
+      });
+      bookmark = await prisma.bookmark.update({
+        where: { id: bookmark.id },
+        data: {
+          aiTitle: aiResult.aiTitle,
+          aiSummary: aiResult.aiSummary,
+          aiTags: JSON.stringify(aiResult.aiTags),
+          aiCategory: aiResult.aiCategory,
+          aiProcessed: true,
+        },
+      });
+    } catch (err) {
+      console.error(`AI analysis failed for ${url}:`, err);
+    }
   }
 
   return NextResponse.json({ bookmark }, { status: 201 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Bookmark } from "@prisma/client";
 import PlatformBadge from "./PlatformIcon";
 
@@ -7,25 +8,51 @@ interface BookmarkCardProps {
   bookmark: Bookmark;
   onToggleFavorite: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
+  onUpdated: (bookmark: Bookmark) => void;
 }
 
 export default function BookmarkCard({
   bookmark,
   onToggleFavorite,
   onDelete,
+  onUpdated,
 }: BookmarkCardProps) {
+  const [analyzing, setAnalyzing] = useState(false);
+
   const displayTitle =
     bookmark.aiTitle || bookmark.title || bookmark.originalUrl;
   const displaySummary = bookmark.aiSummary || bookmark.description;
   const tags: string[] = bookmark.aiTags ? JSON.parse(bookmark.aiTags) : [];
 
+  async function handleAnalyze() {
+    setAnalyzing(true);
+    try {
+      const res = await fetch(`/api/ai/process/${bookmark.id}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onUpdated(data.bookmark);
+      }
+    } catch (err) {
+      console.error("AI analysis failed:", err);
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          {/* Platform badge + date */}
+          {/* Platform badge + category + date */}
           <div className="flex items-center gap-2 mb-2">
             <PlatformBadge platform={bookmark.platform} />
+            {bookmark.aiCategory && (
+              <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                {bookmark.aiCategory}
+              </span>
+            )}
             <span className="text-xs text-gray-400">
               {new Date(bookmark.createdAt).toLocaleDateString("ko-KR")}
             </span>
@@ -35,6 +62,13 @@ export default function BookmarkCard({
           <h3 className="font-semibold text-gray-900 mb-1 truncate">
             {displayTitle}
           </h3>
+
+          {/* Author */}
+          {bookmark.authorName && (
+            <p className="text-xs text-gray-400 mb-1">
+              {bookmark.authorName}
+            </p>
+          )}
 
           {/* Summary */}
           {displaySummary && (
@@ -89,6 +123,17 @@ export default function BookmarkCard({
           }`}
         >
           {bookmark.isFavorite ? "★ 즐겨찾기" : "☆ 즐겨찾기"}
+        </button>
+        <button
+          onClick={handleAnalyze}
+          disabled={analyzing}
+          className="text-sm text-gray-400 hover:text-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition-colors disabled:opacity-50"
+        >
+          {analyzing
+            ? "분석 중..."
+            : bookmark.aiProcessed
+              ? "다시 분석"
+              : "AI 분석"}
         </button>
         <button
           onClick={() => onDelete(bookmark.id)}

@@ -79,6 +79,12 @@ export default function HomePage() {
     );
   }
 
+  function handleUpdated(updated: Bookmark) {
+    setBookmarks((prev) =>
+      prev.map((b) => (b.id === updated.id ? updated : b))
+    );
+  }
+
   async function handleDelete(id: string) {
     if (!confirm("이 북마크를 삭제할까요?")) return;
     await fetch(`/api/bookmarks/${id}`, { method: "DELETE" });
@@ -139,6 +145,7 @@ export default function HomePage() {
               bookmark={bookmark}
               onToggleFavorite={handleToggleFavorite}
               onDelete={handleDelete}
+              onUpdated={handleUpdated}
             />
           ))}
         </div>
