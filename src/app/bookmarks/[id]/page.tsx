@@ -22,6 +22,7 @@ export default function BookmarkDetailPage() {
         setBookmark(data.bookmark);
         setNote(data.bookmark?.userNote || "");
       })
+      .catch((err) => console.error("Failed to load bookmark:", err))
       .finally(() => setLoading(false));
   }, [params.id]);
 
@@ -104,7 +105,10 @@ export default function BookmarkDetailPage() {
     );
   }
 
-  const tags: string[] = bookmark.aiTags ? JSON.parse(bookmark.aiTags) : [];
+  let tags: string[] = [];
+  try {
+    tags = bookmark.aiTags ? JSON.parse(bookmark.aiTags) : [];
+  } catch { /* ignore malformed JSON */ }
   const isYouTube = bookmark.platform === "YOUTUBE";
 
   // Extract YouTube video ID for embed
@@ -114,7 +118,8 @@ export default function BookmarkDetailPage() {
       bookmark.originalUrl.match(/[?&]v=([^&#]+)/) ||
       bookmark.originalUrl.match(/youtu\.be\/([^?&#]+)/) ||
       bookmark.originalUrl.match(/\/shorts\/([^?&#]+)/);
-    youtubeId = match?.[1] || null;
+    const raw = match?.[1] || null;
+    youtubeId = raw && /^[a-zA-Z0-9_-]+$/.test(raw) ? raw : null;
   }
 
   return (

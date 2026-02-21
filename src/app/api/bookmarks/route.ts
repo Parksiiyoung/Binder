@@ -70,6 +70,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Validate URL format
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      throw new Error("Invalid protocol");
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "올바른 URL 형식이 아닙니다." },
+      { status: 400 }
+    );
+  }
+
   // Check for duplicate
   const existing = await prisma.bookmark.findFirst({
     where: { originalUrl: url },

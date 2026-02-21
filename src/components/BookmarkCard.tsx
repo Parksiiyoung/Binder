@@ -23,7 +23,10 @@ export default function BookmarkCard({
   const displayTitle =
     bookmark.aiTitle || bookmark.title || bookmark.originalUrl;
   const displaySummary = bookmark.aiSummary || bookmark.description;
-  const tags: string[] = bookmark.aiTags ? JSON.parse(bookmark.aiTags) : [];
+  let tags: string[] = [];
+  try {
+    tags = bookmark.aiTags ? JSON.parse(bookmark.aiTags) : [];
+  } catch { /* ignore malformed JSON */ }
 
   async function handleAnalyze() {
     setAnalyzing(true);
