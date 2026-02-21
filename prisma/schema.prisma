@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Bookmark {
+  id            String   @id @default(cuid())
+
+  // Source info
+  originalUrl   String
+  platform      String   @default("WEB") // YOUTUBE, TWITTER, INSTAGRAM, WEB, OTHER
+  threadsPostId String?  @unique
+
+  // Extracted content
+  title         String?
+  description   String?
+  content       String?
+  thumbnailUrl  String?
+  authorName    String?
+  publishedAt   DateTime?
+
+  // AI results
+  aiTitle       String?
+  aiSummary     String?
+  aiTags        String?  // JSON array string
+  aiCategory    String?
+  aiProcessed   Boolean  @default(false)
+
+  // User management
+  isRead        Boolean  @default(false)
+  isFavorite    Boolean  @default(false)
+  userNote      String?
+  userTags      String?  // JSON array string
+
+  // Meta
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  syncedAt      DateTime?
+}
