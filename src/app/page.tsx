@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Bookmark } from "@prisma/client";
+import Link from "next/link";
 import BookmarkCard from "@/components/BookmarkCard";
 import AddBookmarkForm from "@/components/AddBookmarkForm";
 import FilterBar from "@/components/FilterBar";
@@ -88,11 +89,19 @@ export default function HomePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       {/* Header */}
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Binder</h1>
-        <p className="text-sm text-gray-500">
-          AI 슈퍼 북마크 · {pagination.total}개 저장됨
-        </p>
+      <header className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Binder</h1>
+          <p className="text-sm text-gray-500">
+            AI 슈퍼 북마크 · {pagination.total}개 저장됨
+          </p>
+        </div>
+        <Link
+          href="/settings"
+          className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          설정
+        </Link>
       </header>
 
       {/* Add bookmark form */}
